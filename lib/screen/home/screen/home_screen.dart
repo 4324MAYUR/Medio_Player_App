@@ -1,4 +1,5 @@
- import 'package:flutter/material.dart';
+ import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
  import 'package:media_player_app/screen/home/provider/home_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -16,9 +17,11 @@ class _HomeScreenState extends State<HomeScreen> {
     hRead = context.read<HomeProvider>();
     hWatch = context.watch<HomeProvider>();
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.grey,
         centerTitle: true,
+        elevation: 0,
         title: const Text("MEDIA PLAYER",
         style: TextStyle(
           fontWeight: FontWeight.bold,
@@ -28,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         leading: IconButton(
             onPressed: () {
+              hRead.pauseSong();
               Navigator.pop(context);
         },
             icon: const Icon(Icons.arrow_back_sharp,
@@ -42,26 +46,36 @@ class _HomeScreenState extends State<HomeScreen> {
           Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(hRead.listOfSong[hWatch.index]['image']!,
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-               fit: BoxFit.cover,
-            ),
+              Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: CachedNetworkImageProvider(hRead.listOfSong[hWatch.currentIndex]['image']!),
+                    ),
+                ),
+              ),
+
+            //   Image.network(hRead.listOfSong[hWatch.index]['image']!,
+            //   height: MediaQuery.of(context).size.height,
+            //   width: MediaQuery.of(context).size.width,
+            //    fit: BoxFit.cover,
+            // ),
               Container(
                 color: Colors.black.withOpacity(0.7),
               ),
                 Column(
                   children: [
-                    Text(hRead.listOfSong[hWatch.index]['title']!,
+                    Text(hRead.listOfSong[hWatch.currentIndex]['title']!,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 22,
                     ),
                     ),
-                    Text(hRead.listOfSong[hWatch.index]['subtitle']!,
+                    Text(hRead.listOfSong[hWatch.currentIndex]['subtitle']!,
                     style: const TextStyle(
-                       color: Colors.black,
+                       color: Colors.white,
                       fontSize: 12,
                     ),
                     ),
@@ -71,10 +85,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // center image
           Center(
-            child: Image.network(hRead.listOfSong[hWatch.index]['image']!,
-              fit: BoxFit.cover,
-              width: 350,
+            child: Container(
               height: 350,
+              width: 350,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(hRead.listOfSong[hWatch.currentIndex]['image']!),
+                ),
+              ),
             ),
           ),
            // icon play , next and previous , slider
@@ -88,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Slider(
                     min: 0,
                     max: hWatch.totalDuration.inSeconds.toDouble(),
-                    value: hWatch.currentPosition.inSeconds.toDouble(),
+                    value: hWatch.currentDuration.inSeconds.toDouble(),
                     activeColor: Colors.white,
                     inactiveColor: Colors.grey,
                     onChanged: (value) {
@@ -98,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text("${hRead.currentPosition.inMinutes}:${(hRead.currentPosition.inSeconds % 60).toString().padLeft(2,'0')}",
+                    Text("${hRead.currentDuration.inMinutes}:${(hRead.currentDuration.inSeconds % 60).toString().padLeft(2,'0')}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -106,13 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     IconButton(
                       onPressed: () {
-                        int previous = (hRead.index > 0)
-                        ? hRead.index -1
-                        : hRead.index;
-                        hRead.indexPass(previous);
-                        hRead.togglePlayPause(
-                          hRead.listOfSong[previous]['url'],
-                        );
+                        hRead.previousSong();
                       },
                       icon: const Icon(
                         Icons.skip_previous,
@@ -122,8 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     IconButton(
                       onPressed: () {
-                        hRead.togglePlayPause(hRead.listOfSong[hRead.index]['url']!);
-                      },
+                        hRead.playOrPause();
+                       },
                       icon: Icon(
                         hWatch.isPlay
                             ? Icons.pause
@@ -134,13 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     IconButton(
                       onPressed: () {
-                        int nextindex =
-                        (hRead.index < hRead.listOfSong.length - 1)
-                            ? hRead.index + 1
-                            : hRead.index;
-                        hRead.indexPass(nextindex);
-                        hRead.togglePlayPause(hRead.listOfSong[nextindex]['url'],
-                        );
+                        hRead.nextSong();
                       },
                       icon: const Icon(
                         Icons.skip_next,

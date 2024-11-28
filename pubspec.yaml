@@ -39,6 +39,11 @@ dependencies:
   provider: ^6.1.2
   audioplayers: 6.1.0
   just_audio: ^0.9.35
+  carousel_slider: ^5.0.0
+  video_player: ^2.9.2
+  chewie: ^1.8.5
+  cached_network_image: ^3.3.1
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
